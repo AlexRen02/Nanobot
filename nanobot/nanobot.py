@@ -1,12 +1,17 @@
 # Import Module
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 import time
 
-# open Chrome
-driver = webdriver.Chrome(
-    '"C:\Users\renal\Downloads\chromedriver_win32\chromedriver.exe"')
+url = 'https://luckynano.com/?p=index'
 
-# Open URL
-driver.get('https://luckynano.com/?p=index')
-print(driver.page_source)
+# open Chrome
+driver = webdriver.Chrome(ChromeDriverManager().install())
+
+# Open URL    
+driver.get(url)
+
+# Wait for page to load
+time.sleep(5)
+
