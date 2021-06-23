@@ -1,4 +1,5 @@
 # Import Module
+import login
 import random
 import datetime
 import getpass
@@ -10,10 +11,6 @@ import time
 # Website URL
 url = 'https://luckynano.com/?p=index'
 dice = 'https://luckynano.com/?p=dice'
-
-# User Input Login Info
-username = input("Username:")
-password = getpass.getpass("Password:")
 
 # Open Chrome
 driver = webdriver.Chrome(ChromeDriverManager().install())
@@ -27,22 +24,8 @@ time.sleep(1)
 # Home Page Button
 home_page = driver.find_element_by_xpath('//*[@id="home_logo"]')
 
-# Login
-# Login Buttons and Inputs
-login_open_button = driver.find_element_by_id('ihm_login_button')
-user_box = driver.find_element_by_id('name')
-pass_box = driver.find_element_by_id('pw')
-login_button = driver.find_element_by_id('login_form_button')
-
-# Open Login Window and Log In
-login_open_button.click()
-time.sleep(1)
-user_box.send_keys(username)
-pass_box.send_keys(password)
-login_button.click()
-
 # Time Variables
-last = datetime.datetime(2021, 6, 22, 14, 15) # Last lottery ticket collection time
+last = datetime.datetime(2000, 1, 1) # Last lottery ticket collection time
 
 # Initialize lotto ticket total
 lotto = 0
@@ -54,23 +37,22 @@ ticket_payout = '10'
 #nano_bet = 0.001
 #nano_payout = 3
 
-# Dice Roll Page
-dice_page = driver.find_element_by_xpath('//*[@id="header_content"]/div[4]/div[2]')
+# Login
+login.login(driver)
+time.sleep(5)
 
 while True:
-
-    time.sleep(1)
-
     # Claim faucet
     # Current ticket amount
     ticket_total = driver.find_element_by_xpath('//*[@id="bonus_accumulated"]/span').get_attribute('innerHTML')
 
-    # Claim tickets if tickets are full
-    if ticket_total == '20/20':
+    # Claim tickets if available
+    if ticket_total != '0/20':
         # Faucet Window Buttons
         faucet_button = driver.find_element_by_id('ihm_faucet_button')
         claim_button = driver.find_element_by_id('bonus_claim')
 
+        time.sleep(1)
         faucet_button.click()
         time.sleep(1)
         claim_button.click()
@@ -92,9 +74,13 @@ while True:
     # Auto dice roll
     my_tickets = int(driver.find_element_by_xpath('//*[@id="header_silver_count"]/span').get_attribute('innerHTML'))
     if my_tickets > 0:
+        # Dice Roll Page
+        dice_page = driver.find_element_by_xpath('//*[@id="header_content"]/div[4]/div[2]')
+        time.sleep(1)
+
         # Go to dice page
         dice_page.click()
-        time.sleep(1)
+        time.sleep(5)
 
         # Dice page buttons
         dice_bet_input = driver.find_element_by_xpath('//*[@id="dice_manual_bet"]/input')
@@ -103,7 +89,7 @@ while True:
         roll_over_button = driver.find_element_by_xpath('//*[@id="dice_manual_roll_high"]')
 
         while my_tickets != 0:
-            time.sleep(2)
+            time.sleep(5)
 
             # Send dice info
             dice_bet_input.send_keys(Keys.CONTROL, 'a') 
@@ -124,5 +110,7 @@ while True:
             my_tickets = int(driver.find_element_by_xpath('//*[@id="header_silver_count"]/span').get_attribute('innerHTML'))
 
     # Return to home page if not rolling
+    time.sleep(2)
     if driver.current_url != url:
         home_page.click()
+        time.sleep(5)
