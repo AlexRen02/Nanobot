@@ -7,12 +7,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 import time
 
+# Login
 def login(driver):
     # User Input Login Info
     username = input("Username:")
     password = getpass.getpass("Password:")
 
-    # Login Buttons and Inputs
+    # Locate login buttons and inputs
     login_open_button = driver.find_element_by_id('ihm_login_button')
     user_box = driver.find_element_by_id('name')
     pass_box = driver.find_element_by_id('pw')
@@ -25,6 +26,21 @@ def login(driver):
     user_box.send_keys(username)
     pass_box.send_keys(password)
     login_button.click()
+
+# Faucet Claim
+def faucet_claim(driver):
+    # Current ticket amount
+    ticket_total = driver.find_element_by_xpath('//*[@id="bonus_accumulated"]/span').get_attribute('innerHTML')
+
+    # Claim tickets if faucet full
+    if ticket_total == '20/20':
+        # Faucet Window Buttons
+        faucet_button = driver.find_element_by_id('ihm_faucet_button')
+        claim_button = driver.find_element_by_id('bonus_claim')
+
+        faucet_button.click()
+        time.sleep(1)
+        claim_button.click()
 
 def main():
     # Website URL
@@ -58,24 +74,11 @@ def main():
 
     # Login
     login(driver)
-    time.sleep(5)
 
     while True:
         # Claim faucet
-        # Current ticket amount
-        ticket_total = driver.find_element_by_xpath('//*[@id="bonus_accumulated"]/span').get_attribute('innerHTML')
-
-        # Claim tickets if available
-        if ticket_total != '0/20':
-            # Faucet Window Buttons
-            faucet_button = driver.find_element_by_id('ihm_faucet_button')
-            claim_button = driver.find_element_by_id('bonus_claim')
-
-            time.sleep(1)
-            faucet_button.click()
-            time.sleep(1)
-            claim_button.click()
-            time.sleep(1)
+        time.sleep(5)
+        faucet_claim(driver)
 
         # Difference in time between now and last collection
         now = datetime.datetime.now()
