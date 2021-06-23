@@ -8,10 +8,19 @@ from selenium.webdriver.common.keys import Keys
 import time
 
 # Login
-def login(driver):
+def login(url):
     # User Input Login Info
     username = input("Username:")
     password = getpass.getpass("Password:")
+
+    # Open Chrome
+    driver = webdriver.Chrome(ChromeDriverManager().install())
+
+    # Open URL    
+    driver.get(url)
+
+    # Wait for page to load
+    time.sleep(1)
 
     # Locate login buttons and inputs
     login_open_button = driver.find_element_by_id('ihm_login_button')
@@ -26,6 +35,9 @@ def login(driver):
     user_box.send_keys(username)
     pass_box.send_keys(password)
     login_button.click()
+
+    # Return driver
+    return driver
 
 # Faucet Claim
 def faucet_claim(driver):
@@ -106,19 +118,6 @@ def select_roll():
 def main():
     # Website URL
     url = 'https://luckynano.com/?p=index'
-
-    # Open Chrome
-    driver = webdriver.Chrome(ChromeDriverManager().install())
-
-    # Open URL    
-    driver.get(url)
-
-    # Wait for page to load
-    time.sleep(1)
-
-    # Website Page Buttons
-    home_page = driver.find_element_by_xpath('//*[@id="home_logo"]')
-    dice_page = driver.find_element_by_xpath('//*[@id="header_content"]/div[4]/div[2]')
     
     # Time Variables
     last = datetime.datetime(2000, 1, 1) # Last lottery ticket collection time
@@ -131,10 +130,15 @@ def main():
     ticket_payout = '10'
     #nano_bet = 0.001
     #nano_payout = 3
+    
+    # Login and set webdriver
+    driver = login(url)
 
-    # Login
-    login(driver)
-
+    # Website Page Buttons
+    home_page = driver.find_element_by_xpath('//*[@id="home_logo"]')
+    dice_page = driver.find_element_by_xpath('//*[@id="header_content"]/div[4]/div[2]')
+    
+    # Main loop
     while True:
         # Claim faucet
         time.sleep(5)
@@ -147,11 +151,9 @@ def main():
         # Auto dice roll
         play_dice(driver, dice_page, ticket_bet, ticket_payout)
 
-        # Return to home page if not rolling
-        time.sleep(2)
+        # Return to home page if not playing
         if driver.current_url != url:
             home_page.click()
-            time.sleep(5)
 
 if __name__ == '__main__':
     main()
