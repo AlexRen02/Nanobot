@@ -8,8 +8,7 @@ from selenium.webdriver.common.keys import Keys
 import time
 
 # Website URL
-url = 'https://luckynano.com/?p=signin'
-url2 = 'https://luckynano.com/?p=index'
+url = 'https://luckynano.com/?p=index'
 dice = 'https://luckynano.com/?p=dice'
 
 # User Input Login Info
@@ -42,23 +41,14 @@ user_box.send_keys(username)
 pass_box.send_keys(password)
 login_button.click()
 
-# Faucet Window Buttons
-faucet_button = driver.find_element_by_id('ihm_faucet_button')
-claim_button = driver.find_element_by_id('bonus_claim')
-
-# Chat
-time.sleep(1)
-chat_box = driver.find_element_by_xpath('//*[@id="chat-input"]')
-
-# Initialize Time Variables
-last = datetime.datetime(2000, 1, 1) # Last lottery ticket collection time
-now = datetime.datetime.now() # Current time
+# Time Variables
+last = datetime.datetime(2021, 6, 22, 14, 15) # Last lottery ticket collection time
 
 # Initialize lotto ticket total
 lotto = 0
 
 # Dice Roll Variables
-my_tickets = int(driver.find_element_by_xpath('//*[@id="header_silver_count"]/span').get_attribute('innerHTML'))
+my_tickets = 0
 ticket_bet = '1'
 ticket_payout = '10'
 #nano_bet = 0.001
@@ -77,22 +67,30 @@ while True:
 
     # Claim tickets if tickets are full
     if ticket_total == '20/20':
+        # Faucet Window Buttons
+        faucet_button = driver.find_element_by_id('ihm_faucet_button')
+        claim_button = driver.find_element_by_id('bonus_claim')
+
         faucet_button.click()
         time.sleep(1)
         claim_button.click()
         time.sleep(1)
 
     # Difference in time between now and last collection
+    now = datetime.datetime.now()
     diff = (now - last).total_seconds()/3600
 
     # Claim lotto ticket
     if lotto < 10 and diff >= 1:
+        # Chat
+        chat_box = driver.find_element_by_xpath('//*[@id="chat-input"]')
         chat_box.send_keys('lotto' + Keys.ENTER)
         last = now
         now = datetime.datetime.now()
         lotto += 1
 
     # Auto dice roll
+    my_tickets = int(driver.find_element_by_xpath('//*[@id="header_silver_count"]/span').get_attribute('innerHTML'))
     if my_tickets > 0:
         # Go to dice page
         dice_page.click()
@@ -126,5 +124,5 @@ while True:
             my_tickets = int(driver.find_element_by_xpath('//*[@id="header_silver_count"]/span').get_attribute('innerHTML'))
 
     # Return to home page if not rolling
-    if driver.current_url != url and driver.current_url != url2:
+    if driver.current_url != url:
         home_page.click()
