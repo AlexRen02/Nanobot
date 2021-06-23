@@ -42,6 +42,24 @@ def faucet_claim(driver):
         time.sleep(1)
         claim_button.click()
 
+# Lottery Claim
+def lottery_claim(driver, last, lotto_total):
+    now = datetime.datetime.now() # Current time
+    time_in_hours = (now - last).total_seconds()/3600 # Difference between current time and last claim in hours
+
+    # If lottery claim requirements met, claim lottery ticket
+    if time_in_hours >= 1 and lotto_total < 10:
+        send_chat(driver, 'lotto') # Send chat to claim lottery
+        lotto_total += 1 # Lottery tickets increased by 1
+        return now, lotto_total # Return current time and new lottery total
+    
+    return last, lotto_total # Return last claim time and lottery total
+
+# Send Chat
+def send_chat(driver, chat):
+    chat_box = driver.find_element_by_xpath('//*[@id="chat-input"]')
+    chat_box.send_keys(chat + Keys.ENTER)
+
 def main():
     # Website URL
     url = 'https://luckynano.com/?p=index'
@@ -63,7 +81,7 @@ def main():
     last = datetime.datetime(2000, 1, 1) # Last lottery ticket collection time
 
     # Initialize lotto ticket total
-    lotto = 0
+    lotto_total = 0
 
     # Dice Roll Variables
     my_tickets = 0
@@ -80,18 +98,9 @@ def main():
         time.sleep(5)
         faucet_claim(driver)
 
-        # Difference in time between now and last collection
-        now = datetime.datetime.now()
-        diff = (now - last).total_seconds()/3600
-
-        # Claim lotto ticket
-        if lotto < 10 and diff >= 1:
-            # Chat
-            chat_box = driver.find_element_by_xpath('//*[@id="chat-input"]')
-            chat_box.send_keys('lotto' + Keys.ENTER)
-            last = now
-            now = datetime.datetime.now()
-            lotto += 1
+        # Claim lottery ticket if possible and set new last claim time and lottery ticket total
+        time.sleep(5)
+        last, lotto_total = lottery_claim(driver, last, lotto_total)
 
         # Auto dice roll
         my_tickets = int(driver.find_element_by_xpath('//*[@id="header_silver_count"]/span').get_attribute('innerHTML'))
