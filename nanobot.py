@@ -31,7 +31,6 @@ def login(url):
     # Open Login Window and Log In
     time.sleep(1)
     login_open_button.click()
-    time.sleep(1)
     user_box.send_keys(username)
     pass_box.send_keys(password)
     login_button.click()
@@ -50,8 +49,8 @@ def faucet_claim(driver):
         faucet_button = driver.find_element_by_id('ihm_faucet_button')
         claim_button = driver.find_element_by_id('bonus_claim')
 
-        faucet_button.click()
         time.sleep(1)
+        faucet_button.click()
         claim_button.click()
 
 # Lottery Claim
@@ -76,10 +75,10 @@ def send_chat(driver, chat):
     chat_box.send_keys(chat + Keys.ENTER)
 
 # Play Dice
-def play_dice(driver, dice_page, bet, payout):
+def play_dice(driver, url, bet, payout):
     my_tickets = int(driver.find_element_by_xpath('//*[@id="header_silver_count"]/span').get_attribute('innerHTML'))
     if my_tickets > 0:
-        dice_page.click()
+        driver.get(url)
         time.sleep(5)
 
         # Dice page buttons
@@ -117,13 +116,12 @@ def select_roll():
 
 def main():
     # Website URL
-    url = 'https://luckynano.com/?p=index'
-    
-    # Time Variables
-    last = datetime.datetime(2000, 1, 1) # Last lottery ticket collection time
+    home = 'https://luckynano.com/?p=index'
+    dice = 'https://luckynano.com/?p=dice'
 
-    # Initialize lotto ticket total
-    lotto_total = 0
+    # Time Variables
+    # Need to find actual last time of collection
+    last = datetime.datetime(2000, 1, 1) # Last lottery ticket collection time
 
     # Dice Roll Variables
     ticket_bet = '1'
@@ -132,28 +130,31 @@ def main():
     #nano_payout = 3
     
     # Login and set webdriver
-    driver = login(url)
-
-    # Website Page Buttons
-    home_page = driver.find_element_by_xpath('//*[@id="home_logo"]')
-    dice_page = driver.find_element_by_xpath('//*[@id="header_content"]/div[4]/div[2]')
+    driver = login(home)
+    time.sleep(1)
+    
+    # Find lotto_total
+    send_chat(driver, '/lottery')
+    time.sleep(1)
+    lotto_total = int(driver.find_element_by_xpath('(//*[@id="chat-box"]/p[@class="chat_system_message"])[last()-1]/span').get_attribute('innerHTML'))
     
     # Main loop
     while True:
         # Claim faucet
-        time.sleep(5)
+        time.sleep(2)
         faucet_claim(driver)
 
         # Claim lottery ticket if possible and set new last claim time and lottery ticket total
-        time.sleep(5)
+        time.sleep(2)
         last, lotto_total = lottery_claim(driver, last, lotto_total)
 
         # Auto dice roll
-        play_dice(driver, dice_page, ticket_bet, ticket_payout)
+        time.sleep(2)
+        play_dice(driver, dice, ticket_bet, ticket_payout)
 
         # Return to home page if not playing
-        if driver.current_url != url:
-            home_page.click()
+        if driver.current_url != home:
+            driver.get(home)
 
 if __name__ == '__main__':
     main()
