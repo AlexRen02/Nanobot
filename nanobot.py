@@ -1,10 +1,10 @@
 # Import Module
-import random
-import datetime
-import getpass
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
+import random
+import datetime
+import getpass
 import time
 
 # Login
@@ -54,17 +54,13 @@ def faucet_claim(driver):
         claim_button.click()
 
 # Lottery Claim
-def lottery_claim(driver, last, lotto_total):
-    now = datetime.datetime.now() # Current time
-    time_in_hours = (now - last).total_seconds()/3600 # Difference between current time and last claim in hours
-
+def lottery_claim(driver, next_ticket, lotto_total):
     # If lottery claim requirements met, claim lottery ticket
-    if time_in_hours >= 1 and lotto_total < 10:
+    if next_ticket == True:
         send_chat(driver, 'lotto') # Send chat to claim lottery
         lotto_total += 1 # Lottery tickets increased by 1
-        return now, lotto_total # Return current time and new lottery total
     
-    return last, lotto_total # Return last claim time and lottery total
+    return lotto_total # Return lottery ticket total
 
 # Send Chat
 def send_chat(driver, chat):
@@ -114,14 +110,18 @@ def select_roll():
     else:
         return 'under'
 
+# Returns if next lottery ticket is available
+def ticket_check(driver):
+    substring = 'Next ticket available in'
+    text = driver.find_element_by_xpath('(//*[@id="chat-box"]/p[@class="chat_system_message"])[last()]').get_attribute('innerHTML')
+    if substring in text:
+        return False
+    return True
+
 def main():
     # Website URL
     home = 'https://luckynano.com/?p=index'
     dice = 'https://luckynano.com/?p=dice'
-
-    # Time Variables
-    # Need to find actual last time of collection
-    last = datetime.datetime(2000, 1, 1) # Last lottery ticket collection time
 
     # Dice Roll Variables
     ticket_bet = '1'
@@ -146,7 +146,8 @@ def main():
 
         # Claim lottery ticket if possible and set new last claim time and lottery ticket total
         time.sleep(2)
-        last, lotto_total = lottery_claim(driver, last, lotto_total)
+        next_ticket = ticket_check(driver)
+        lotto_total = lottery_claim(driver, next_ticket, lotto_total)
 
         # Auto dice roll
         time.sleep(2)
