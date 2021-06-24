@@ -56,7 +56,7 @@ def faucet_claim(driver):
 # Lottery Claim
 def lottery_claim(driver, next_ticket, lotto_total):
     # If lottery claim requirements met, claim lottery ticket
-    if next_ticket == True:
+    if next_ticket == True and lotto_total < 10:
         send_chat(driver, 'lotto') # Send chat to claim lottery
         lotto_total += 1 # Lottery tickets increased by 1
     
@@ -112,6 +112,8 @@ def select_roll():
 
 # Returns if next lottery ticket is available
 def ticket_check(driver):
+    send_chat(driver, '/lottery')
+    time.sleep(2)
     substring = 'Next ticket available in'
     text = driver.find_element_by_xpath('(//*[@id="chat-box"]/p[@class="chat_system_message"])[last()]').get_attribute('innerHTML')
     if substring in text:
@@ -156,6 +158,7 @@ def main():
         # Return to home page if not playing
         if driver.current_url != home:
             driver.get(home)
+            time.sleep(5)
 
 if __name__ == '__main__':
     main()
