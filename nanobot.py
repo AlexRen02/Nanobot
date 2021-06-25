@@ -3,7 +3,6 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 import random
-import datetime
 import getpass
 import time
 
@@ -33,6 +32,7 @@ def login(url):
     login_open_button.click()
     user_box.send_keys(username)
     pass_box.send_keys(password)
+    time.sleep(0.5)
     login_button.click()
 
     # Return driver
@@ -51,21 +51,26 @@ def faucet_claim(driver):
 
         time.sleep(1)
         faucet_button.click()
+        time.sleep(1)
         claim_button.click()
 
 # Lottery Claim
-def lottery_claim(driver, next_ticket, lotto_total):
+def lottery_claim(driver, next_ticket):
     # If lottery claim requirements met, claim lottery ticket
-    if next_ticket == True and lotto_total < 10:
+    if next_ticket == True:
         send_chat(driver, 'lotto') # Send chat to claim lottery
-        lotto_total += 1 # Lottery tickets increased by 1
-    
-    return lotto_total # Return lottery ticket total
 
 # Send Chat
 def send_chat(driver, chat):
     # Find chat box
     chat_box = driver.find_element_by_xpath('//*[@id="chat-input"]')
+    time.sleep(1)
+    
+    # Clear chat
+    chat_box.send_keys(Keys.CONTROL + 'a')
+    time.sleep(0.5)
+    chat_box.send_keys(Keys.BACKSPACE)
+    time.sleep(1)
     
     # Send chat
     chat_box.send_keys(chat + Keys.ENTER)
@@ -112,13 +117,16 @@ def select_roll():
 
 # Returns if next lottery ticket is available
 def ticket_check(driver):
+    # Get lottery info in chat
     send_chat(driver, '/lottery')
     time.sleep(2)
-    substring = 'Next ticket available in'
+    
+    # Check if next ticket is available
+    substring = 'Chat now with other players'
     text = driver.find_element_by_xpath('(//*[@id="chat-box"]/p[@class="chat_system_message"])[last()]').get_attribute('innerHTML')
     if substring in text:
-        return False
-    return True
+        return True
+    return False
 
 def main():
     # Website URL
@@ -133,12 +141,7 @@ def main():
     
     # Login and set webdriver
     driver = login(home)
-    time.sleep(1)
-    
-    # Find lotto_total
-    send_chat(driver, '/lottery')
-    time.sleep(1)
-    lotto_total = int(driver.find_element_by_xpath('(//*[@id="chat-box"]/p[@class="chat_system_message"])[last()-1]/span').get_attribute('innerHTML'))
+    time.sleep(2)
     
     # Main loop
     while True:
@@ -149,7 +152,7 @@ def main():
         # Claim lottery ticket if possible and set new last claim time and lottery ticket total
         time.sleep(2)
         next_ticket = ticket_check(driver)
-        lotto_total = lottery_claim(driver, next_ticket, lotto_total)
+        lottery_claim(driver, next_ticket)
 
         # Auto dice roll
         time.sleep(2)
