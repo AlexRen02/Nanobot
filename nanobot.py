@@ -135,7 +135,7 @@ def main():
 
     # Dice Roll Variables
     ticket_bet = '1'
-    ticket_payout = '10'
+    ticket_payout = '100'
     #nano_bet = 0.001
     #nano_payout = 3
     
